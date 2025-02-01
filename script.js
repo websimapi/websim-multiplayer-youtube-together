@@ -19,8 +19,13 @@ function getYouTubeVideoId(url) {
 // Update host assignment based on connected peers
 function updateHostStatus() {
   const peers = room.party.peers;
-  const clientIds = Object.keys(peers).sort();
-  // The first id in sorted order is considered host
+  let clientIds = Object.keys(peers);
+  // If peers object doesn't include any client, default to current client
+  if (clientIds.length === 0) {
+    clientIds = [room.party.client.id];
+  } else {
+    clientIds.sort();
+  }
   const hostId = clientIds[0];
   isHost = (room.party.client.id === hostId);
   const hostIndicatorElem = document.getElementById("hostIndicator");
@@ -28,7 +33,7 @@ function updateHostStatus() {
     hostIndicatorElem.textContent = "Status: You are the host.";
     document.getElementById("host-controls").classList.remove("hidden");
   } else {
-    hostIndicatorElem.textContent = "Status: You are a guest. Host: " + peers[hostId].username;
+    hostIndicatorElem.textContent = "Status: You are a guest. Host: " + (peers[hostId] ? peers[hostId].username : "Unknown");
     document.getElementById("host-controls").classList.add("hidden");
   }
 }
