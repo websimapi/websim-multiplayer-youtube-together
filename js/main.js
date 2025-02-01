@@ -15,16 +15,28 @@ class App {
     const connectOverlay = document.getElementById("connect-overlay");
     const container = document.getElementById("container");
 
-    connectBtn.addEventListener("click", () => {
-      // Initialize everything after connection button is clicked
-      this.setupRoom();
-      this.setupChat();
-      this.setupYoutubePlayer();
-      this.setupHostControls();
+    connectBtn.addEventListener("click", async () => {
+      connectBtn.disabled = true;
+      connectBtn.textContent = "Connecting...";
+      
+      try {
+        // Connect to WebSocket room first
+        await room.connect();
+        
+        // Then initialize everything after connection is established
+        this.setupRoom();
+        this.setupChat();
+        this.setupYoutubePlayer();
+        this.setupHostControls();
 
-      // Hide overlay and show main container
-      connectOverlay.style.display = "none";
-      container.classList.remove("hidden");
+        // Hide overlay and show main container
+        connectOverlay.style.display = "none";
+        container.classList.remove("hidden");
+      } catch (error) {
+        console.error("Failed to connect:", error);
+        connectBtn.textContent = "Failed to connect. Try again";
+        connectBtn.disabled = false;
+      }
     });
   }
 

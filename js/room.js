@@ -2,17 +2,25 @@ import { WebsimSocket } from "https://cdn.jsdelivr.net/npm/websimsocket@1.0.0/di
 
 class Room {
   constructor() {
-    this.socket = new WebsimSocket();
+    this.socket = null;
     this.hostId = null;
     this.onHostChange = null;
-    this.setupHostAssignment();
+  }
+
+  async connect() {
+    this.socket = new WebsimSocket();
+    
+    return new Promise((resolve) => {
+      this.socket.onopen = () => {
+        this.setupHostAssignment();
+        resolve();
+      };
+    });
   }
 
   setupHostAssignment() {
     // Initial host assignment when socket connects
-    this.socket.onopen = () => {
-      this.updateHost();
-    };
+    this.updateHost();
     
     // Update host when peers change (join/leave)
     this.socket.party.subscribe((peers) => {

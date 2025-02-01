@@ -40,6 +40,11 @@ body, html {
   background: #1976D2;
 }
 
+#connectBtn:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+
 #container {
   display: flex;
   height: 100vh;
