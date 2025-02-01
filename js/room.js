@@ -9,28 +9,43 @@ class Room {
   }
 
   setupHostAssignment() {
-    // Initial host assignment
-    this.updateHost();
+    // Initial host assignment when socket connects
+    this.socket.onopen = () => {
+      this.updateHost();
+    };
     
-    // Update host when peers change
-    this.socket.party.subscribe(() => {
+    // Update host when peers change (join/leave)
+    this.socket.party.subscribe((peers) => {
       this.updateHost();
     });
   }
 
   updateHost() {
     const peers = this.socket.party.peers;
-    const allClientsIds = Object.keys(peers);
+    const clientId = this.socket.party.client.id;
     
-    // If no other peers, current client becomes host
-    if (allClientsIds.length === 0) {
-      this.hostId = this.socket.party.client.id;
+    // Get all connected peers including current client
+    const allPeers = { 
+      ...peers,
+      [clientId]: {
+        username: this.socket.party.client.username,
+        id: clientId
+      }
+    };
+
+    // Get array of all peer IDs
+    const peerIds = Object.keys(allPeers);
+
+    if (peerIds.length === 0) {
+      // If somehow no peers (shouldn't happen), current client is host
+      this.hostId = clientId;
     } else {
-      // Sort by connection time (implicit in the order of peers)
-      allClientsIds.sort();
-      this.hostId = allClientsIds[0];
+      // First connected peer becomes host
+      // The peers object maintains insertion order, so first key is oldest peer
+      this.hostId = peerIds[0];
     }
 
+    // Notify of host change
     if (this.onHostChange) {
       this.onHostChange(this.isHost(), this.getHostUsername());
     }
@@ -42,9 +57,11 @@ class Room {
 
   getHostUsername() {
     if (!this.hostId) return "Unknown";
+    
     if (this.hostId === this.socket.party.client.id) {
       return this.socket.party.client.username;
     }
+    
     return this.socket.party.peers[this.hostId]?.username || "Unknown";
   }
 
