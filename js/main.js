@@ -7,10 +7,25 @@ class App {
   constructor() {
     this.currentVideoId = null;
     this.syncInterval = null;
-    this.setupRoom();
-    this.setupChat();
-    this.setupYoutubePlayer();
-    this.setupHostControls();
+    this.setupConnectionFlow();
+  }
+
+  setupConnectionFlow() {
+    const connectBtn = document.getElementById("connectBtn");
+    const connectOverlay = document.getElementById("connect-overlay");
+    const container = document.getElementById("container");
+
+    connectBtn.addEventListener("click", () => {
+      // Initialize everything after connection button is clicked
+      this.setupRoom();
+      this.setupChat();
+      this.setupYoutubePlayer();
+      this.setupHostControls();
+
+      // Hide overlay and show main container
+      connectOverlay.style.display = "none";
+      container.classList.remove("hidden");
+    });
   }
 
   setupRoom() {
